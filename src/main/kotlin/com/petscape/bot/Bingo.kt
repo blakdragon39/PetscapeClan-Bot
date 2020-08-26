@@ -89,6 +89,6 @@ private fun sendWinners(channel: MessageChannel) {
 }
 
 private fun sendCard(channel: MessageChannel, username: String) {
-    channel.sendMessage("TODO implement send card").queue()
-    //todo
+    val response = api.getCardImage(mainGameId!!, username).execute().body() //todo error checking!!
+    channel.sendFile(response?.byteStream()!!, "bingocard.png").queue()
 }
