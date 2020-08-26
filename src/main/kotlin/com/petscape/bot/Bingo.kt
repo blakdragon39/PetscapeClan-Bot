@@ -1,18 +1,33 @@
 package com.petscape.bot
 
+import com.petscape.bot.models.GameType
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
     if (args.isNotEmpty()) {
+        val commandArgs = args.subList(1, args.size)
         when (args[0]) {
             "list" -> sendBingoGamesList(event)
-            "setgame" -> setGame(event, args[0])
+            "setgame" -> setGame(event, commandArgs[0])
             "newgame" -> {
-                val gameName = args.joinToString(" ")
+                val gameName = commandArgs.joinToString(" ")
                 newGame(event, gameName)
             }
-            
+            "addcard" -> {
+                val username = commandArgs.joinToString(" ")
+                addCard(event, username)
+            }
+            "completesquare" -> {
+                val square = commandArgs[0].toInt()
+                val username = commandArgs.subList(1, args.size).joinToString(" ")
+                completeSquare(event, username, square)
+            }
+            "winners" -> sendWinners(event.channel)
+            "getcard" -> {
+                val username = commandArgs.joinToString(" ")
+                sendCard(event.channel, username)
+            }
         }
     } else {
         sendBingoCommands(event.channel)
@@ -30,20 +45,20 @@ private fun sendBingoCommands(channel: MessageChannel) {
         Available commands:
         - list
         - setgame
-        - newgame
-        - addcard TODO implement
-        - completesquare TODO implement
-        - update notes TODO implement
-        - winners TODO implement
-        - getcard TODO implement
+        - newgame game name
+        - addcard
+        - completesquare
+        - winners
+        - getcard
     """.trimIndent()).queue()
 
     //todo newcustomgame
+    //todo updatenotes
 }
 
 private fun sendBingoGamesList(event: MessageReceivedEvent) = runIfClanStaff(event) {
-    val response = api.getAllGames().execute().body()
-    val games = response
+    val gameIds = api.getAllGames().execute().body()
+    val games = gameIds
             ?.map { "${it.name} ID: ${it.id}" }
             ?.joinToString("\n") ?: "No games found"
     event.channel.sendMessage(games).queue()
@@ -55,5 +70,25 @@ private fun setGame(event: MessageReceivedEvent, gameId: String) = runIfClanStaf
 }
 
 private fun newGame(event: MessageReceivedEvent, gameName: String) = runIfClanStaff(event) {
+    val game = api.newBingoGame(gameName, GameType.BOSSES, freeSpace = true, cardsMatch = false).execute().body() //todo more options
+    mainGameId = game?.id
+    event.channel.sendMessage("Game $gameName created and started").queue()
+}
+
+private fun addCard(event: MessageReceivedEvent, username: String) = runIfClanStaff(event) {
+    api.addCard(mainGameId!!, username).execute() //todo error checking...
+    sendCard(event.channel, username)
+}
+
+private fun completeSquare(event: MessageReceivedEvent, username: String, square: Int) = runIfClanStaff(event) {
+    //todo
+}
+
+private fun sendWinners(channel: MessageChannel) {
+    //todo
+}
+
+private fun sendCard(channel: MessageChannel, username: String) {
+    channel.sendMessage("TODO implement send card").queue()
     //todo
 }
