@@ -4,11 +4,17 @@ import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import okhttp3.Request
 
+fun runIfClanStaff(event: MessageReceivedEvent, function: () -> Unit) {
+    if (event.member.roles.any { it.name == "Clan Staff" }) {
+        function()
+    }
+}
+
 fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
     if (args.isNotEmpty()) {
         when (args[0]) {
-            "list" -> sendBingoGamesList(event.channel)
-            "setgame" -> setGame(args[0], event.channel)
+            "list" -> sendBingoGamesList(event)
+            "setgame" -> setGame(event, args[0])
         }
     } else {
         sendBingoCommands(event.channel)
@@ -22,19 +28,17 @@ private fun sendBingoCommands(channel: MessageChannel) {
     """.trimIndent()).queue()
 }
 
-//todo restrict to clan staff
-private fun sendBingoGamesList(channel: MessageChannel) {
+private fun sendBingoGamesList(event: MessageReceivedEvent) = runIfClanStaff(event) {
     val request = Request.Builder()
             .url("http://localhost:8080/bingo/all")
             .header("Authorization", credentials)
             .build()
     val response = client.newCall(request).execute()
 
-    channel.sendMessage(response.body()?.string()).queue()
+    event.channel.sendMessage(response.body()?.string()).queue()
 }
 
-//todo restrict to clan staff
-private fun setGame(gameId: String, channel: MessageChannel) {
+private fun setGame(event: MessageReceivedEvent, gameId: String) = runIfClanStaff(event) {
     mainGameId = gameId
-    channel.sendMessage("Game ID set").queue()
+    event.channel.sendMessage("Game ID set").queue()
 }
