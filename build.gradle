@@ -8,6 +8,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile 'net.dv8tion:JDA:3.8.1_447'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'net.dv8tion:JDA:3.8.1_447'
+    implementation 'com.squareup.moshi:moshi-kotlin:1.9.3'
 }
