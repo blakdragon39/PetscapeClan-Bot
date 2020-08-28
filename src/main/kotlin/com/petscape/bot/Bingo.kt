@@ -20,7 +20,7 @@ fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
             }
             "completesquare" -> {
                 val square = commandArgs[0].toInt()
-                val username = commandArgs.subList(1, args.size).joinToString(" ")
+                val username = commandArgs.subList(1, commandArgs.size).joinToString(" ")
                 completeSquare(event, username, square)
             }
             "winners" -> sendWinners(event.channel)
@@ -44,12 +44,12 @@ private fun sendBingoCommands(channel: MessageChannel) {
     channel.sendMessage("""
         Available commands:
         - list
-        - setgame
-        - newgame game name
-        - addcard
-        - completesquare
+        - setgame [gameId]
+        - newgame [game name]
+        - addcard [username]
+        - completesquare [square ID 1-25] [username]
         - winners
-        - getcard
+        - getcard [username]
     """.trimIndent()).queue()
 
     //todo newcustomgame
@@ -81,7 +81,11 @@ private fun addCard(event: MessageReceivedEvent, username: String) = runIfClanSt
 }
 
 private fun completeSquare(event: MessageReceivedEvent, username: String, square: Int) = runIfClanStaff(event) {
-    //todo
+    val card = api.getCard(mainGameId!!, username).execute().body() //todo errorrrrsss
+    val squareId = card?.squares?.get(square - 1)?.id
+
+    api.completeSquare(mainGameId!!, card?.id!!, squareId!!).execute()
+    sendCard(event.channel, username)
 }
 
 private fun sendWinners(channel: MessageChannel) {

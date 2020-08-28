@@ -41,17 +41,17 @@ interface BingoAPI {
     //todo notes?
 
     @GET("bingo/winners")
-    fun getWinners(@Query("game_id") id: String): Call<List<BingoCard>>
+    fun getWinners(@Query("game_id") gameId: String): Call<List<BingoCard>>
 
     @GET("bingo/get_card")
     fun getCard(
-            @Query("game_id") id: String,
+            @Query("game_id") gameId: String,
             @Query("username") username: String
     ): Call<BingoCard>
 
     @GET("bingo/get_card_image")
     fun getCardImage(
-            @Query("game_id") id: String,
+            @Query("game_id") gameId: String,
             @Query("username") username: String
     ): Call<ResponseBody>
 }
