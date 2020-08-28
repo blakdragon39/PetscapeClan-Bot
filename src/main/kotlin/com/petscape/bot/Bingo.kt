@@ -89,7 +89,17 @@ private fun completeSquare(event: MessageReceivedEvent, username: String, square
 }
 
 private fun sendWinners(channel: MessageChannel) {
-    //todo
+    val winningCards = api.getWinners(mainGameId!!).execute().body() //todo hm errors
+
+    if (winningCards?.isEmpty() == true) {
+        channel.sendMessage("There are no winners yet").queue()
+    } else {
+        var message = ""
+        winningCards?.forEachIndexed { index, card ->
+            message += "${index + 1}. ${card.username}"
+        }
+        channel.sendMessage(message).queue()
+    }
 }
 
 private fun sendCard(channel: MessageChannel, username: String) {
