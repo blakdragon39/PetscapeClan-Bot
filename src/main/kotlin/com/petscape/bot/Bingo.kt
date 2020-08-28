@@ -3,6 +3,8 @@ package com.petscape.bot
 import com.petscape.bot.models.GameType
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import okhttp3.ResponseBody
+import java.io.IOException
 
 fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
     if (args.isNotEmpty()) {
@@ -37,6 +39,8 @@ fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
 private fun runIfClanStaff(event: MessageReceivedEvent, function: () -> Unit) {
     if (event.member.roles.any { it.name == "Clan Staff" }) {
         function()
+    } else {
+        sendMessage(event.channel, "Permission not granted")
     }
 }
 
@@ -57,52 +61,133 @@ private fun sendBingoCommands(channel: MessageChannel) {
 }
 
 private fun sendBingoGamesList(event: MessageReceivedEvent) = runIfClanStaff(event) {
-    val gameIds = api.getAllGames().execute().body()
-    val games = gameIds
-            ?.map { "${it.name} ID: ${it.id}" }
-            ?.joinToString("\n") ?: "No games found"
-    event.channel.sendMessage(games).queue()
+    try {
+        val response = api.getAllGames().execute()
+
+        if (response.isSuccessful) {
+            val gameIds = response.body()
+            val gamesMessage = gameIds
+                    ?.map { "${it.name} ID: ${it.id}" }
+                    ?.joinToString("\n") ?: "No games found"
+            sendMessage(event.channel, gamesMessage)
+        } else {
+            sendError(event.channel, response.errorBody())
+        }
+    } catch (e: IOException) {
+        sendError(event.channel, e)
+    }
 }
 
 private fun setGame(event: MessageReceivedEvent, gameId: String) = runIfClanStaff(event) {
     mainGameId = gameId
-    event.channel.sendMessage("Game ID set").queue()
+    sendMessage(event.channel, "Game ID set")
 }
 
 private fun newGame(event: MessageReceivedEvent, gameName: String) = runIfClanStaff(event) {
-    val game = api.newBingoGame(gameName, GameType.BOSSES, freeSpace = true, cardsMatch = false).execute().body() //todo more options
-    mainGameId = game?.id
-    event.channel.sendMessage("Game $gameName created and started").queue()
+    try {
+        //todo more options
+        val response = api.newBingoGame(gameName, GameType.BOSSES, freeSpace = true, cardsMatch = false).execute()
+
+        if (response.isSuccessful) {
+            val game = response.body()
+            mainGameId = game?.id
+            event.channel.sendMessage("Game $gameName created and started").queue()
+        } else {
+            sendError(event.channel, response.errorBody())
+        }
+    } catch (e: IOException) {
+        sendError(event.channel, e)
+    }
 }
 
 private fun addCard(event: MessageReceivedEvent, username: String) = runIfClanStaff(event) {
-    api.addCard(mainGameId!!, username).execute() //todo error checking...
-    sendCard(event.channel, username)
+    try {
+        val response = api.addCard(mainGameId ?: throw GameNotSetException(), username).execute()
+
+        if (response.isSuccessful) {
+            sendCard(event.channel, username)
+        } else {
+            sendError(event.channel, response.errorBody())
+        }
+    } catch (e: IOException) {
+        sendError(event.channel, e)
+    } catch (e: GameNotSetException) {
+        sendError(event.channel, e)
+    }
 }
 
 private fun completeSquare(event: MessageReceivedEvent, username: String, square: Int) = runIfClanStaff(event) {
-    val card = api.getCard(mainGameId!!, username).execute().body() //todo errorrrrsss
-    val squareId = card?.squares?.get(square - 1)?.id
+    try {
+        val card = api.getCard(mainGameId ?: throw GameNotSetException(), username).execute().body()
+                ?: return@runIfClanStaff sendMessage(event.channel, "Card not found for player $username")
 
-    api.completeSquare(mainGameId!!, card?.id!!, squareId!!).execute()
-    sendCard(event.channel, username)
+        val squareId = card.squares[square - 1].id
+
+        api.completeSquare(mainGameId ?: throw GameNotSetException(), card.id, squareId).execute()
+        sendCard(event.channel, username)
+    } catch (e: IOException) {
+        sendError(event.channel, e)
+    } catch (e: GameNotSetException) {
+        sendError(event.channel, e)
+    }
 }
 
 private fun sendWinners(channel: MessageChannel) {
-    val winningCards = api.getWinners(mainGameId!!).execute().body() //todo hm errors
+    try {
+        val response = api.getWinners(mainGameId ?: throw GameNotSetException()).execute()
 
-    if (winningCards?.isEmpty() == true) {
-        channel.sendMessage("There are no winners yet").queue()
-    } else {
-        var message = ""
-        winningCards?.forEachIndexed { index, card ->
-            message += "${index + 1}. ${card.username}"
+        if (response.isSuccessful) {
+            val winningCards = response.body()
+
+            if (winningCards?.isEmpty() == true) {
+                sendMessage(channel, "There are no winners yet")
+            } else {
+                var message = ""
+                winningCards?.forEachIndexed { index, card ->
+                    message += "${index + 1}. ${card.username}"
+                }
+                sendMessage(channel, message)
+            }
+        } else {
+            sendError(channel, response.errorBody())
         }
-        channel.sendMessage(message).queue()
+    } catch (e: IOException) {
+        sendError(channel, e)
+    } catch (e: GameNotSetException) {
+        sendError(channel, e)
     }
 }
 
 private fun sendCard(channel: MessageChannel, username: String) {
-    val response = api.getCardImage(mainGameId!!, username).execute().body() //todo error checking!!
-    channel.sendFile(response?.byteStream()!!, "bingocard.png").queue()
+    try {
+        val response = api.getCardImage(mainGameId ?: throw GameNotSetException(), username).execute()
+
+        if (response.isSuccessful) {
+            val image = response.body()
+            channel.sendFile(image?.byteStream()!!, "bingocard.png").queue()
+        } else {
+            sendError(channel, response.errorBody())
+        }
+    } catch (e: IOException) {
+        sendError(channel, e)
+    } catch (e: GameNotSetException) {
+        sendError(channel, e)
+    }
+}
+
+private fun sendError(channel: MessageChannel, e: Exception) {
+    e.printStackTrace()
+    sendMessage(channel, e.message)
+}
+
+private fun sendError(channel: MessageChannel, error: ResponseBody?) {
+    sendMessage(channel, error?.string())
+}
+
+private fun sendMessage(channel: MessageChannel, message: String?) {
+    if (message != null) {
+        channel.sendMessage(message).queue()
+    } else {
+        channel.sendMessage("A server error occurred").queue()
+    }
 }
