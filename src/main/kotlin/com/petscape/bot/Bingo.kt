@@ -47,11 +47,11 @@ private fun runIfClanStaff(event: MessageReceivedEvent, function: () -> Unit) {
 private fun sendBingoCommands(channel: MessageChannel) {
     channel.sendMessage("""
         Available commands:
-        - list
-        - setgame [gameId]
-        - newgame [game name]
-        - addcard [username]
-        - completesquare [square ID 1-25] [username]
+        - list **Clan Staff only**
+        - setgame [gameId] **Clan Staff only**
+        - newgame [game name] **Clan Staff only**
+        - addcard [username] **Clan Staff only**
+        - completesquare [square ID 1-25] [username] **Clan Staff only**
         - winners
         - getcard [username]
     """.trimIndent()).queue()
@@ -66,10 +66,13 @@ private fun sendBingoGamesList(event: MessageReceivedEvent) = runIfClanStaff(eve
 
         if (response.isSuccessful) {
             val gameIds = response.body()
-            val gamesMessage = gameIds
-                    ?.map { "${it.name} ID: ${it.id}" }
-                    ?.joinToString("\n") ?: "No games found"
-            sendMessage(event.channel, gamesMessage)
+            val message = if (gameIds == null || gameIds.isEmpty()) {
+                "No games found"
+            } else {
+                gameIds.map { "${it.name} ID: ${it.id}" }
+                        .joinToString("\n")
+            }
+            sendMessage(event.channel, message)
         } else {
             sendError(event.channel, response.errorBody())
         }
