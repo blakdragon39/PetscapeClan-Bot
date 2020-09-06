@@ -14,9 +14,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.File
 
-val url = "https://localhost:8080"
+const val url = "http://localhost:8080"
 
-val moshi = Moshi.Builder()
+val moshi: Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
 
@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
             .build()
 
     api = Retrofit.Builder()
-            .baseUrl("http://localhost:8080")
+            .baseUrl(url)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()

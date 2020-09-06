@@ -1,20 +1,29 @@
 package com.petscape.bot
 
-import com.petscape.bot.models.GameType
+import com.petscape.bot.exceptions.GameNotSetException
+import com.petscape.bot.models.BingoSettings
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import java.io.File
 import java.io.IOException
 
 fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
     if (args.isNotEmpty()) {
+        //todo validate arguments
         val commandArgs = args.subList(1, args.size)
         when (args[0]) {
             "list" -> sendBingoGamesList(event)
             "setgame" -> setGame(event, commandArgs[0])
             "newgame" -> {
-                val gameName = commandArgs.joinToString(" ")
-                newGame(event, gameName)
+                val settings = BingoSettings(commandArgs, event.message) //todo exceptions
+                if (settings.attachment != null) {
+                    newCustomGame(event, settings)
+                } else {
+                    newGame(event, settings)
+                }
             }
             "addcard" -> {
                 val username = commandArgs.joinToString(" ")
@@ -29,6 +38,9 @@ fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
             "getcard" -> {
                 val username = commandArgs.joinToString(" ")
                 sendCard(event.channel, username)
+            }
+            else -> {
+                //todo send error about wrong command
             }
         }
     } else {
@@ -49,7 +61,8 @@ private fun sendBingoCommands(channel: MessageChannel) {
         Available commands:
         - list **Clan Staff only**
         - setgame [gameId] **Clan Staff only**
-        - newgame [game name] **Clan Staff only**
+        - newgame [bosses, items, combined] [freespace] [cardsmatch] [game name] **Clan Staff only**
+        - newgame [attach file with card] **Clan Staff only**
         - addcard [username] **Clan Staff only**
         - completesquare [square ID 1-25] [username] **Clan Staff only**
         - winners
@@ -86,20 +99,49 @@ private fun setGame(event: MessageReceivedEvent, gameId: String) = runIfClanStaf
     sendMessage(event.channel, "Game ID set")
 }
 
-private fun newGame(event: MessageReceivedEvent, gameName: String) = runIfClanStaff(event) {
+private fun newGame(event: MessageReceivedEvent, settings: BingoSettings) = runIfClanStaff(event) {
     try {
-        //todo more options
-        val response = api.newBingoGame(gameName, GameType.BOSSES, freeSpace = true, cardsMatch = false).execute()
+        val response = api.newBingoGame(settings.gameName, settings.type, settings.freeSpace, settings.cardsMatch).execute()
 
         if (response.isSuccessful) {
             val game = response.body()
             mainGameId = game?.id
-            event.channel.sendMessage("Game $gameName created and started").queue()
+            event.channel.sendMessage("Game ${settings.gameName} created and started").queue()
         } else {
             sendError(event.channel, response.errorBody())
         }
     } catch (e: IOException) {
         sendError(event.channel, e)
+    }
+}
+
+private fun newCustomGame(event: MessageReceivedEvent, settings: BingoSettings) = runIfClanStaff(event) {
+    if (settings.attachment != null) {
+        val file = File("attachment.temp")
+        val success = settings.attachment.download(file)
+
+        if (!success) {
+            sendMessage(event.channel, "Unable to read attached card")
+            return@runIfClanStaff
+        } else {
+            try {
+                val contents = file.readText()
+                val requestBody = RequestBody.create(MediaType.parse("text/json"), contents)
+                val response = api.newCustomGame(settings.gameName, requestBody).execute()
+
+                if (response.isSuccessful) {
+                    val game = response.body()
+                    mainGameId = game?.id
+                    sendMessage(event.channel, "Game ${settings.gameName} created and started")
+                } else {
+                    sendError(event.channel, response.errorBody())
+                }
+            } catch (e: IOException) {
+                sendError(event.channel, e)
+            }
+        }
+
+        file.delete()
     }
 }
 

@@ -1,11 +1,10 @@
 package com.petscape.bot
 
-import com.petscape.bot.models.BingoCard
-import com.petscape.bot.models.BingoGame
-import com.petscape.bot.models.BingoGameId
-import com.petscape.bot.models.GameType
+import com.petscape.bot.models.*
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -23,7 +22,11 @@ interface BingoAPI {
             @Query("cards_match") cardsMatch: Boolean
     ): Call<BingoGame>
 
-    //todo custom game
+    @POST("bingo/new_custom_game")
+    fun newCustomGame(
+            @Query("name") name: String,
+            @Body body: RequestBody
+    ): Call<BingoGame>
 
     @POST("bingo/add_card")
     fun addCard(
