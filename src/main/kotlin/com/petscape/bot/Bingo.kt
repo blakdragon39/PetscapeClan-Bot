@@ -1,6 +1,7 @@
 package com.petscape.bot
 
 import com.petscape.bot.exceptions.GameNotSetException
+import com.petscape.bot.exceptions.InvalidGameTypeException
 import com.petscape.bot.models.BingoSettings
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
@@ -9,38 +10,65 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.IOException
+import java.lang.IndexOutOfBoundsException
+import java.lang.NumberFormatException
 
 fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
     if (args.isNotEmpty()) {
-        //todo validate arguments
         val commandArgs = args.subList(1, args.size)
         when (args[0]) {
             "list" -> sendBingoGamesList(event)
-            "setgame" -> setGame(event, commandArgs[0])
+            "setgame" -> {
+                try {
+                    setGame(event, commandArgs[0])
+                } catch (e: IndexOutOfBoundsException) {
+                    sendMessage(event.channel, "No game ID supplied")
+                }
+            }
             "newgame" -> {
-                val settings = BingoSettings(commandArgs, event.message) //todo exceptions
-                if (settings.attachment != null) {
-                    newCustomGame(event, settings)
-                } else {
-                    newGame(event, settings)
+                try {
+                    val settings = BingoSettings(commandArgs, event.message)
+                    if (settings.attachment != null) {
+                        newCustomGame(event, settings)
+                    } else {
+                        newGame(event, settings)
+                    }
+                } catch (e: InvalidGameTypeException) {
+                    sendMessage(event.channel, "Invalid game type supplied")
+                } catch (e: IndexOutOfBoundsException) {
+                    sendMessage(event.channel, "Too few argument supplied")
                 }
             }
             "addcard" -> {
                 val username = commandArgs.joinToString(" ")
-                addCard(event, username)
+                if (username.isBlank()) {
+                    sendMessage(event.channel, "No username supplied")
+                } else {
+                    addCard(event, username)
+                }
             }
             "completesquare" -> {
-                val square = commandArgs[0].toInt()
-                val username = commandArgs.subList(1, commandArgs.size).joinToString(" ")
-                completeSquare(event, username, square)
+                try {
+                    val square = commandArgs[0].toInt()
+                    val username = commandArgs.subList(1, commandArgs.size).joinToString(" ")
+                    completeSquare(event, username, square)
+                } catch (e: NumberFormatException) {
+                    sendMessage(event.channel, "Invalid square number supplied")
+                } catch (e:IndexOutOfBoundsException) {
+                    sendMessage(event.channel, "Provide a square number from 1 to 25")
+                }
             }
             "winners" -> sendWinners(event.channel)
             "getcard" -> {
                 val username = commandArgs.joinToString(" ")
-                sendCard(event.channel, username)
+                if (username.isBlank()) {
+                    sendMessage(event.channel, "No username supplied")
+                } else {
+                    sendCard(event.channel, username)
+                }
             }
             else -> {
-                //todo send error about wrong command
+                sendMessage(event.channel, "Unknown command ${args[0]}")
             }
         }
     } else {
@@ -69,8 +97,7 @@ private fun sendBingoCommands(channel: MessageChannel) {
         - getcard [username]
     """.trimIndent()).queue()
 
-    //todo newcustomgame
-    //todo updatenotes
+    //todo updatenotes?
 }
 
 private fun sendBingoGamesList(event: MessageReceivedEvent) = runIfClanStaff(event) {
