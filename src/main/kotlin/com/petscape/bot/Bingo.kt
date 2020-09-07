@@ -58,6 +58,7 @@ fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
                     sendMessage(event.channel, "Provide a square number from 1 to 25")
                 }
             }
+            "players" -> sendPlayers(event.channel)
             "winners" -> sendWinners(event.channel)
             "getcard" -> {
                 val username = commandArgs.joinToString(" ")
@@ -201,6 +202,32 @@ private fun completeSquare(event: MessageReceivedEvent, username: String, square
         sendError(event.channel, e)
     } catch (e: GameNotSetException) {
         sendError(event.channel, e)
+    }
+}
+
+private fun sendPlayers(channel: MessageChannel) {
+    try {
+        val response = api.getPlayers(mainGameId ?: throw GameNotSetException()).execute()
+
+        if (response.isSuccessful) {
+            val players = response.body()
+
+            if (players?.isEmpty() == true) {
+                sendMessage(channel, "No players yet")
+            } else {
+                var message = ""
+                players?.sortedBy { it.toLowerCase() }?.forEach {
+                    message += "$it\n"
+                }
+                sendMessage(channel, message)
+            }
+        } else {
+            sendError(channel, response.errorBody())
+        }
+    } catch(e: IOException) {
+        sendError(channel, e)
+    } catch (e: GameNotSetException) {
+        sendError(channel, e)
     }
 }
 

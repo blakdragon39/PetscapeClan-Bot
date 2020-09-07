@@ -43,6 +43,9 @@ interface BingoAPI {
 
     //todo notes?
 
+    @GET("bingo/players")
+    fun getPlayers(@Query("game_id") gameId: String): Call<List<String>>
+
     @GET("bingo/winners")
     fun getWinners(@Query("game_id") gameId: String): Call<List<BingoCard>>
 
