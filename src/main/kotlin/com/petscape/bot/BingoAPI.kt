@@ -1,6 +1,9 @@
 package com.petscape.bot
 
-import com.petscape.bot.models.*
+import com.petscape.bot.models.bingo.BingoCard
+import com.petscape.bot.models.bingo.BingoGame
+import com.petscape.bot.models.GameId
+import com.petscape.bot.models.bingo.GameType
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -12,7 +15,7 @@ import retrofit2.http.Query
 interface BingoAPI {
 
     @GET("bingo/all")
-    fun getAllGames(): Call<List<BingoGameId>>
+    fun getAllGames(): Call<List<GameId>>
 
     @POST("bingo/new_game")
     fun newBingoGame(

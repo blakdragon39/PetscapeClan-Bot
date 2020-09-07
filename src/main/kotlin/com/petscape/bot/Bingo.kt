@@ -2,7 +2,7 @@ package com.petscape.bot
 
 import com.petscape.bot.exceptions.GameNotSetException
 import com.petscape.bot.exceptions.InvalidGameTypeException
-import com.petscape.bot.models.BingoSettings
+import com.petscape.bot.models.bingo.BingoSettings
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import okhttp3.MediaType
@@ -103,7 +103,7 @@ private fun sendBingoCommands(channel: MessageChannel) {
 
 private fun sendBingoGamesList(event: MessageReceivedEvent) = runIfClanStaff(event) {
     try {
-        val response = api.getAllGames().execute()
+        val response = bingoApi.getAllGames().execute()
 
         if (response.isSuccessful) {
             val gameIds = response.body()
@@ -129,7 +129,7 @@ private fun setGame(event: MessageReceivedEvent, gameId: String) = runIfClanStaf
 
 private fun newGame(event: MessageReceivedEvent, settings: BingoSettings) = runIfClanStaff(event) {
     try {
-        val response = api.newBingoGame(settings.gameName, settings.type, settings.freeSpace, settings.cardsMatch).execute()
+        val response = bingoApi.newBingoGame(settings.gameName, settings.type, settings.freeSpace, settings.cardsMatch).execute()
 
         if (response.isSuccessful) {
             val game = response.body()
@@ -155,7 +155,7 @@ private fun newCustomGame(event: MessageReceivedEvent, settings: BingoSettings) 
             try {
                 val contents = file.readText()
                 val requestBody = RequestBody.create(MediaType.parse("text/json"), contents)
-                val response = api.newCustomGame(settings.gameName, requestBody).execute()
+                val response = bingoApi.newCustomGame(settings.gameName, requestBody).execute()
 
                 if (response.isSuccessful) {
                     val game = response.body()
@@ -175,7 +175,7 @@ private fun newCustomGame(event: MessageReceivedEvent, settings: BingoSettings) 
 
 private fun addCard(event: MessageReceivedEvent, username: String) = runIfClanStaff(event) {
     try {
-        val response = api.addCard(mainGameId ?: throw GameNotSetException(), username).execute()
+        val response = bingoApi.addCard(mainGameId ?: throw GameNotSetException(), username).execute()
 
         if (response.isSuccessful) {
             sendCard(event.channel, username)
@@ -191,12 +191,12 @@ private fun addCard(event: MessageReceivedEvent, username: String) = runIfClanSt
 
 private fun completeSquare(event: MessageReceivedEvent, username: String, square: Int) = runIfClanStaff(event) {
     try {
-        val card = api.getCard(mainGameId ?: throw GameNotSetException(), username).execute().body()
+        val card = bingoApi.getCard(mainGameId ?: throw GameNotSetException(), username).execute().body()
                 ?: return@runIfClanStaff sendMessage(event.channel, "Card not found for player $username")
 
         val squareId = card.squares[square - 1].id
 
-        api.completeSquare(mainGameId ?: throw GameNotSetException(), card.id, squareId).execute()
+        bingoApi.completeSquare(mainGameId ?: throw GameNotSetException(), card.id, squareId).execute()
         sendCard(event.channel, username)
     } catch (e: IOException) {
         sendError(event.channel, e)
@@ -207,7 +207,7 @@ private fun completeSquare(event: MessageReceivedEvent, username: String, square
 
 private fun sendPlayers(channel: MessageChannel) {
     try {
-        val response = api.getPlayers(mainGameId ?: throw GameNotSetException()).execute()
+        val response = bingoApi.getPlayers(mainGameId ?: throw GameNotSetException()).execute()
 
         if (response.isSuccessful) {
             val players = response.body()
@@ -233,7 +233,7 @@ private fun sendPlayers(channel: MessageChannel) {
 
 private fun sendWinners(channel: MessageChannel) {
     try {
-        val response = api.getWinners(mainGameId ?: throw GameNotSetException()).execute()
+        val response = bingoApi.getWinners(mainGameId ?: throw GameNotSetException()).execute()
 
         if (response.isSuccessful) {
             val winningCards = response.body()
@@ -259,7 +259,7 @@ private fun sendWinners(channel: MessageChannel) {
 
 private fun sendCard(channel: MessageChannel, username: String) {
     try {
-        val response = api.getCardImage(mainGameId ?: throw GameNotSetException(), username).execute()
+        val response = bingoApi.getCardImage(mainGameId ?: throw GameNotSetException(), username).execute()
 
         if (response.isSuccessful) {
             val image = response.body()

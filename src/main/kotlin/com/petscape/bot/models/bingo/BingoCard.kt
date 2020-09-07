@@ -1,4 +1,4 @@
-package com.petscape.bot.models
+package com.petscape.bot.models.bingo
 
 class BingoCard(
         val id: String,

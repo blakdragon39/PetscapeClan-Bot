@@ -1,4 +1,7 @@
-package com.petscape.bot.models
+package com.petscape.bot.models.bingo
+
+import com.petscape.bot.models.Boss
+import com.petscape.bot.models.Drop
 
 class BingoSquare(
         val id: String,

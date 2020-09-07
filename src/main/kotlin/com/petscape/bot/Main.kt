@@ -20,7 +20,8 @@ val moshi: Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
 
-lateinit var api: BingoAPI
+lateinit var bingoApi: BingoAPI
+lateinit var leaderboardApi: LeaderboardAPI
 
 var mainGameId: String? = null
 
@@ -36,16 +37,23 @@ fun main(args: Array<String>) {
             .addInterceptor(AuthHeaderInterceptor(credentials))
             .build()
 
-    api = Retrofit.Builder()
+    bingoApi = Retrofit.Builder()
             .baseUrl(url)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(BingoAPI::class.java)
 
-    val jda = JDABuilder(AccountType.BOT)
-    jda.setToken(config.token)
+    leaderboardApi = Retrofit.Builder()
+            .baseUrl(url)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(LeaderboardAPI::class.java)
 
+    val jda = JDABuilder(AccountType.BOT)
+
+    jda.setToken(config.token)
     jda.addEventListener(object : ListenerAdapter() {
         override fun onMessageReceived(event: MessageReceivedEvent) {
             val parts = event.message?.contentRaw?.split(" ") ?: emptyList()

@@ -1,4 +1,4 @@
-package com.petscape.bot.models
+package com.petscape.bot.models.bingo
 
 import com.petscape.bot.exceptions.InvalidGameTypeException
 import net.dv8tion.jda.core.entities.Message
