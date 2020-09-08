@@ -23,7 +23,8 @@ val moshi: Moshi = Moshi.Builder()
 lateinit var bingoApi: BingoAPI
 lateinit var leaderboardApi: LeaderboardAPI
 
-var mainGameId: String? = null
+var bingoGameId: String? = null
+var leaderboardGameId: String? = null
 
 fun main(args: Array<String>) {
     val configFile = args.firstOrNull()?.let {
@@ -60,6 +61,7 @@ fun main(args: Array<String>) {
             if (event.author?.isBot == false && parts.isNotEmpty()) {
                 when (parts[0]) {
                     "!bingo" -> handleBingoCommand(event, parts.subList(1, parts.size))
+                    "!leaderboard" -> handleLeaderboardCommand(event, parts.subList(1, parts.size))
                 }
             }
         }
