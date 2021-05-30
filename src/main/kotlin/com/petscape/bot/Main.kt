@@ -9,6 +9,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import okhttp3.Credentials
@@ -62,8 +63,8 @@ fun main(args: Array<String>) {
             .build()
             .create(OsrsAPI::class.java)
 
-    val jda = JDABuilder.createDefault(config.token)
-    jda.addEventListeners(object : ListenerAdapter() {
+    val jdaBuilder = JDABuilder.createDefault(config.token)
+    jdaBuilder.addEventListeners(object : ListenerAdapter() {
         override fun onMessageReceived(event: MessageReceivedEvent) {
             val message = event.message.contentRaw
             val parts = message.split(" ")
@@ -81,7 +82,8 @@ fun main(args: Array<String>) {
         }
     })
 
-    jda.build().awaitReady()
+    val jda = jdaBuilder.build().awaitReady()
+    jda.presence.setPresence(Activity.playing("ps!help"), false)
 }
 
 private class Config(val token: String, val username: String, val password: String)
