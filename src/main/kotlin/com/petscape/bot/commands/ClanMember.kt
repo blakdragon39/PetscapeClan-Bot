@@ -8,6 +8,7 @@ import com.petscape.bot.sendMessage
 import com.petscape.bot.toNetworkError
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.min
 
@@ -36,9 +37,9 @@ fun handleClanMemberCommand(event: MessageReceivedEvent, args: List<String>) {
         val achievementPoints = clanMember.achievements.size
 
         val message = """
-            **$runescapeName:**
-            Time in clan points: $timePoints
-            Boss KC points: $bossKcPoints
+            **$runescapeName:** ${clanMember.points} Points
+            Join Date: ${clanMember.joinDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))} ($timePoints points)
+            Boss KC: ${clanMember.bossKc} ($bossKcPoints points)
             Pets: $petPoints
             Achievements: $achievementPoints
         """.trimIndent()
