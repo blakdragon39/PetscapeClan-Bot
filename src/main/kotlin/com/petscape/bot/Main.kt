@@ -71,9 +71,9 @@ fun main(args: Array<String>) {
             if (!event.author.isBot && parts.isNotEmpty()) {
                 when {
                     message.toLowerCase().startsWith("ps!help") -> handleHelpCommand(event)
-                    message.toLowerCase().startsWith("ps!clanmember ") -> handleClanMemberCommand(event, parts.subList(1, parts.size))
-                    message.toLowerCase().startsWith("ps!pets ") -> handlePetsCommand(event, parts.subList(1, parts.size))
-                    message.toLowerCase().startsWith("ps!achievements ") -> handleAchievementsCommand(event, parts.subList(1, parts.size))
+                    message.toLowerCase().startsWith("ps!clanmember") -> handleClanMemberCommand(event, parts.subList(1, parts.size))
+                    message.toLowerCase().startsWith("ps!pets") -> handlePetsCommand(event, parts.subList(1, parts.size))
+                    message.toLowerCase().startsWith("ps!achievements") -> handleAchievementsCommand(event, parts.subList(1, parts.size))
 //                    message.startsWith("!bingo") -> handleBingoCommand(event, parts.subList(1, parts.size))
 //                    message.startsWith("!kc") -> handleKillCountCommand(event, parts.subList(1, parts.size))
 //                    message.startsWith("!createpoll") -> handleCreatePollCommand(event)

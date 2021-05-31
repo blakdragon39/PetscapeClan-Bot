@@ -18,16 +18,14 @@ const val MAX_POINTS_TIME = 24
 fun handleHelpCommand(event: MessageReceivedEvent) {
     sendMessage(event.channel, """
         Commands:
-        ps!clanmember
-        ps!pets
-        ps!achievements
+        ps!clanmember [name]
+        ps!pets [name]
+        ps!achievements [name]
     """.trimIndent())
 }
 
 fun handleClanMemberCommand(event: MessageReceivedEvent, args: List<String>) {
-    val runescapeName = args.toRunescapeName()
-
-    getClanMember(event, runescapeName)?.let { clanMember ->
+    getClanMember(event, args.toRunescapeName())?.let { clanMember ->
         val bossKcPoints = min(clanMember.bossKc / 1000, MAX_POINTS_BOSSES)
         val timePoints = min(
             ChronoUnit.MONTHS.between(clanMember.joinDate, LocalDate.now()).toInt(),
@@ -37,7 +35,7 @@ fun handleClanMemberCommand(event: MessageReceivedEvent, args: List<String>) {
         val achievementPoints = clanMember.achievements.size
 
         val message = """
-            **$runescapeName:** ${clanMember.points} Points
+            **${clanMember.runescapeName}:** ${clanMember.points} Points
             Join Date: ${clanMember.joinDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))} ($timePoints points)
             Boss KC: ${clanMember.bossKc} ($bossKcPoints points)
             Pets: $petPoints
@@ -51,7 +49,8 @@ fun handleClanMemberCommand(event: MessageReceivedEvent, args: List<String>) {
 fun handlePetsCommand(event: MessageReceivedEvent, args: List<String>) {
     getClanMember(event, args.toRunescapeName())?.let { clanMember ->
         val header = "**Pets** (${clanMember.pets.size}/${PetType.values().size})"
-        val petsMessage = clanMember.pets.joinToString("\n") { it.type.displayName }
+        val pets = clanMember.pets.sortedBy { it.type.ordinal }
+        val petsMessage = pets.joinToString("\n") { it.type.displayName }
         val message = "$header\n$petsMessage"
         sendMessage(event.channel, message)
     }
@@ -60,7 +59,8 @@ fun handlePetsCommand(event: MessageReceivedEvent, args: List<String>) {
 fun handleAchievementsCommand(event: MessageReceivedEvent, args: List<String>) {
     getClanMember(event, args.toRunescapeName())?.let { clanMember ->
         val header = "**Achievements** (${clanMember.achievements.size}/${AchievementType.values().size})"
-        val achievementsMessage = clanMember.achievements.joinToString("\n") { it.type.displayName }
+        val achievements = clanMember.achievements.sortedBy { it.type.ordinal }
+        val achievementsMessage = achievements.joinToString("\n") { it.type.displayName }
         val message = "$header\n$achievementsMessage"
         sendMessage(event.channel, message)
     }
@@ -79,7 +79,7 @@ private fun getClanMember(event: MessageReceivedEvent, runescapeName: String): C
         }
     } catch (e: Exception) {
         e.printStackTrace()
-        sendMessage(event.channel, e.message)
+        sendMessage(event.channel, "Error: ${e.message}")
         return null
     }
 }
