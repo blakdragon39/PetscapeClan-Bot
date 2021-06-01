@@ -8,8 +8,8 @@ import retrofit2.http.*
 
 interface PetscapeAPI {
 
-    @GET("api/clanMembers/runescapeName/{runescapeName}")
-    fun getClanMember(@Path("runescapeName") runescapeName: String): Call<ClanMember>
+    @GET("api/clanMembers/runescapeName")
+    fun getClanMember(@Query("runescapeName") runescapeName: String): Call<ClanMember>
 
     @GET("bingo/all")
     fun getAllGames(): Call<List<BingoGameId>>
