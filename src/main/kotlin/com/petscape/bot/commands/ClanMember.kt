@@ -59,6 +59,8 @@ fun handlePetsCommand(event: MessageReceivedEvent, args: List<String>) {
 fun handleAchievementsCommand(event: MessageReceivedEvent, args: List<String>) {
     getClanMember(event, args.toRunescapeName())?.let { clanMember ->
         val header = "**Achievements** (${clanMember.achievements.size}/${AchievementType.values().size})"
+
+
         val achievements = clanMember.achievements.sortedBy { it.type.ordinal }
         val achievementsMessage = achievements.joinToString("\n") { it.type.displayName }
         val message = "$header\n$achievementsMessage"

@@ -11,6 +11,7 @@ enum class AchievementType(val displayName: String) {
 
     TransmogDarkAcorn("Dark Acorn Squirrel Transmog"),
     TransmogMetamorphicDust("Metamorphic Dust Olmlet Transmog"),
+    TransmogSanguineDust("Sanguine Dust Verzik Trasmog"),
     Transmog6Jads("TzHaar-Ket-Rak's Challenges Jad Transmog"),
     TransmogBlueHeron("Blue Heron Transmog"),
     TransmogSraracha("Sraracha Transmogs"),
@@ -37,5 +38,7 @@ enum class AchievementType(val displayName: String) {
     ChampionCape("Champion's Cape"),
     InfernalCape("Infernal Cape"),
     XericsCape("Xerics Cape"),
-    SinhazaShroud("Sinhaza Shroud")
+    SinhazaShroud("Sinhaza Shroud"),
+
+    Unknown("Unknown Achievement")
 }

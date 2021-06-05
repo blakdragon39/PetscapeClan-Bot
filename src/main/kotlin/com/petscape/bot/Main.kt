@@ -4,9 +4,12 @@ import com.petscape.bot.commands.handleAchievementsCommand
 import com.petscape.bot.commands.handleClanMemberCommand
 import com.petscape.bot.commands.handleHelpCommand
 import com.petscape.bot.commands.handlePetsCommand
+import com.petscape.bot.models.AchievementType
+import com.petscape.bot.models.PetType
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
+import com.squareup.moshi.adapters.EnumJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
@@ -30,6 +33,8 @@ val moshi: Moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
     .add(LocalDateAdapter())
     .add(LocalDateTimeAdapter())
+    .add(PetType::class.java, EnumJsonAdapter.create(PetType::class.java).withUnknownFallback(PetType.Unknown))
+    .add(AchievementType::class.java, EnumJsonAdapter.create(AchievementType::class.java).withUnknownFallback(AchievementType.Unknown))
     .build()
 
 lateinit var petscapeApi: PetscapeAPI

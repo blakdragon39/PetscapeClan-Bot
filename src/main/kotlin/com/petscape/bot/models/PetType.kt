@@ -50,5 +50,7 @@ enum class PetType(val displayName: String) {
     Phoenix("Phoenix"),
     TinyTempor("Tiny Tempor"),
     Youngllef("Youngllef"),
-    Smolcano("Smolcano")
+    Smolcano("Smolcano"),
+
+    Unknown("Unknown Pet")
 }
