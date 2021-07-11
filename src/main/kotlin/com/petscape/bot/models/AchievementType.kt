@@ -15,6 +15,7 @@ enum class AchievementType(val displayName: String) {
     Transmog6Jads("TzHaar-Ket-Rak's Challenges Jad Transmog"),
     TransmogBlueHeron("Blue Heron Transmog"),
     TransmogSraracha("Sraracha Transmogs"),
+    TransmogParasiticEgg("Phosani's Nightmare Transmog"),
 
     Clues600Beginner("600 Beginner Clues"),
     Clues500Easy("500 Easy Clues"),
