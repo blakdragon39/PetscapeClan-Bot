@@ -50,7 +50,7 @@ fun handlePetsCommand(event: MessageReceivedEvent, args: List<String>) {
     getClanMember(event, args.toRunescapeName())?.let { clanMember ->
         val header = "**Pets** (${clanMember.pets.size}/${PetType.values().size})"
         val pets = clanMember.pets.sortedBy { it.type.ordinal }
-        val petsMessage = pets.joinToString("\n") { it.type.displayName }
+        val petsMessage = pets.joinToString("\n") { it.label }
         val message = "$header\n$petsMessage"
         sendMessage(event.channel, message)
     }
@@ -60,9 +60,8 @@ fun handleAchievementsCommand(event: MessageReceivedEvent, args: List<String>) {
     getClanMember(event, args.toRunescapeName())?.let { clanMember ->
         val header = "**Achievements** (${clanMember.achievements.size}/${AchievementType.values().size})"
 
-
         val achievements = clanMember.achievements.sortedBy { it.type.ordinal }
-        val achievementsMessage = achievements.joinToString("\n") { it.type.displayName }
+        val achievementsMessage = achievements.joinToString("\n") { it.label }
         val message = "$header\n$achievementsMessage"
         sendMessage(event.channel, message)
     }
