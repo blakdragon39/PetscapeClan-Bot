@@ -1,15 +1,7 @@
 package com.petscape.bot.models
 
-enum class Rank {
-    Bronze,
-    Iron,
-    Steel,
-    Gold,
-    Mithril,
-    Adamant,
-    Rune,
-    Dragon,
-    Admin,
-    DeputyOwner,
-    Owner
-}
+class Rank(
+    val rank: String,
+    val label: String,
+    val order: Int
+)

@@ -36,6 +36,7 @@ fun handleClanMemberCommand(event: MessageReceivedEvent, args: List<String>) {
 
         val message = """
             **${clanMember.runescapeName}:** ${clanMember.points} Points
+            Rank: ${clanMember.rank.label}
             Join Date: ${clanMember.joinDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))} ($timePoints points)
             Boss KC: ${clanMember.bossKc} ($bossKcPoints points)
             Pets: $petPoints
