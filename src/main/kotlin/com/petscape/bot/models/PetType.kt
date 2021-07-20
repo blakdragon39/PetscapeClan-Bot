@@ -52,5 +52,9 @@ enum class PetType {
     Youngllef,
     Smolcano,
 
-    Unknown
+    Unknown;
+
+    companion object {
+        fun validPets(): List<PetType> = values().toMutableList().apply { remove(Unknown) }
+    }
 }

@@ -41,5 +41,9 @@ enum class AchievementType {
     XericsCape,
     SinhazaShroud,
 
-    Unknown
+    Unknown;
+
+    companion object {
+        fun validAchievements(): List<AchievementType> = values().toMutableList().apply { remove(Unknown) }
+    }
 }
