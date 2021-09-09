@@ -11,6 +11,9 @@ interface PetscapeAPI {
     @GET("api/clanMembers/runescapeName")
     fun getClanMember(@Query("runescapeName") runescapeName: String): Call<ClanMember>
 
+    @PUT("api/clanMembers/{id}/update")
+    fun pingClanMember(@Path("id") clanMemberId: String): Call<ClanMember>
+
     @GET("bingo/all")
     fun getAllGames(): Call<List<BingoGameId>>
 

@@ -9,6 +9,11 @@ enum class AchievementType {
     Base90Stats,
     Combat126,
 
+    CombatAchievementsEasyMedHard,
+    CombatAchievementsElite,
+    CombatAchievementsMaster,
+    CombatAchievementsGrandmaster,
+
     TransmogDarkAcorn,
     TransmogMetamorphicDust,
     TransmogSanguineDust,

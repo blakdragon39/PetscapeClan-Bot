@@ -72,9 +72,17 @@ fun List<String>.toRunescapeName() = joinToString(" ")
 
 private fun getClanMember(event: MessageReceivedEvent, runescapeName: String): ClanMember? {
     try {
-        val response = petscapeApi.getClanMember(runescapeName).execute()
+        var response = petscapeApi.getClanMember(runescapeName).execute()
+
         return if (response.isSuccessful) {
-            response.body()!!
+            response = petscapeApi.pingClanMember(response.body()!!.id!!).execute()
+
+            if (response.isSuccessful) {
+                response.body()!!
+            } else {
+                sendMessage(event.channel, response.errorBody()?.toNetworkError()?.message)
+                return null
+            }
         } else {
             sendMessage(event.channel, response.errorBody()?.toNetworkError()?.message)
             null
