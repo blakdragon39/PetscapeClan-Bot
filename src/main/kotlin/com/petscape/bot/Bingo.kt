@@ -3,6 +3,8 @@ package com.petscape.bot
 import com.petscape.bot.exceptions.GameNotSetException
 import com.petscape.bot.exceptions.InvalidGameTypeException
 import com.petscape.bot.models.BingoSettings
+import com.petscape.bot.models.requests.SquareRequest
+import com.petscape.bot.models.requests.UsernameRequest
 import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -31,7 +33,7 @@ fun handleBingoCommand(event: MessageReceivedEvent, args: List<String>) {
                     if (settings.attachment != null) {
                         newCustomGame(event, settings)
                     } else {
-                        newGame(event, settings)
+//                        newGame(event, settings) todo
                     }
                 } catch (e: InvalidGameTypeException) {
                     sendMessage(event.channel, "Invalid game type supplied")
@@ -140,21 +142,21 @@ private fun setGame(event: MessageReceivedEvent, gameId: String) = runIfClanStaf
     sendMessage(event.channel, "Game ID set")
 }
 
-private fun newGame(event: MessageReceivedEvent, settings: BingoSettings) = runIfClanStaff(event) {
-    try {
-        val response = petscapeApi.newBingoGame(settings.gameName, settings.type, settings.freeSpace, settings.cardsMatch).execute()
-
-        if (response.isSuccessful) {
-            val game = response.body()
-            mainGameId = game?.id
-            event.channel.sendMessage("Game ${settings.gameName} created and started").queue()
-        } else {
-            sendError(event.channel, response.errorBody())
-        }
-    } catch (e: IOException) {
-        sendError(event.channel, e)
-    }
-}
+//private fun newGame(event: MessageReceivedEvent, settings: BingoSettings) = runIfClanStaff(event) {
+//    try {
+//        val response = petscapeApi.newBingoGame(settings.gameName, settings.type, settings.freeSpace, settings.cardsMatch).execute()
+//
+//        if (response.isSuccessful) {
+//            val game = response.body()
+//            mainGameId = game?.id
+//            event.channel.sendMessage("Game ${settings.gameName} created and started").queue()
+//        } else {
+//            sendError(event.channel, response.errorBody())
+//        }
+//    } catch (e: IOException) {
+//        sendError(event.channel, e)
+//    }
+//}
 
 private fun newCustomGame(event: MessageReceivedEvent, settings: BingoSettings) = runIfClanStaff(event) {
     if (settings.attachment != null) {
@@ -165,7 +167,7 @@ private fun newCustomGame(event: MessageReceivedEvent, settings: BingoSettings) 
                     try {
                         val contents = file.readText()
                         val requestBody = contents.toRequestBody("text/json".toMediaTypeOrNull())
-                        val response = petscapeApi.newCustomGame(settings.gameName, requestBody).execute()
+                        val response = petscapeApi.newCustomGame(requestBody).execute()
 
                         if (response.isSuccessful) {
                             val game = response.body()
@@ -190,7 +192,7 @@ private fun newCustomGame(event: MessageReceivedEvent, settings: BingoSettings) 
 
 private fun addCard(event: MessageReceivedEvent, username: String) = runIfClanStaff(event) {
     try {
-        val response = petscapeApi.addCard(mainGameId ?: throw GameNotSetException(), username).execute()
+        val response = petscapeApi.addCard(mainGameId ?: throw GameNotSetException(), UsernameRequest(username)).execute()
 
         if (response.isSuccessful) {
             sendCard(event.channel, username)
@@ -206,12 +208,7 @@ private fun addCard(event: MessageReceivedEvent, username: String) = runIfClanSt
 
 private fun completeSquare(event: MessageReceivedEvent, username: String, square: Int) = runIfClanStaff(event) {
     try {
-        val card = petscapeApi.getCard(mainGameId ?: throw GameNotSetException(), username).execute().body()
-                ?: return@runIfClanStaff sendMessage(event.channel, "Card not found for player $username")
-
-        val squareId = card.squares[square - 1].id
-
-        petscapeApi.completeSquare(mainGameId ?: throw GameNotSetException(), card.id, squareId).execute()
+        petscapeApi.completeSquare(mainGameId ?: throw GameNotSetException(), SquareRequest(square, username)).execute()
         sendCard(event.channel, username)
     } catch (e: IOException) {
         sendError(event.channel, e)
@@ -222,12 +219,7 @@ private fun completeSquare(event: MessageReceivedEvent, username: String, square
 
 private fun uncompleteSquare(event: MessageReceivedEvent, username: String, square: Int) = runIfClanStaff(event) {
     try {
-        val card = petscapeApi.getCard(mainGameId ?: throw GameNotSetException(), username).execute().body()
-                ?: return@runIfClanStaff sendMessage(event.channel, "Card not found for player $username")
-
-        val squareId = card.squares[square - 1].id
-
-        petscapeApi.completeSquare(mainGameId ?: throw GameNotSetException(), card.id, squareId).execute()
+        petscapeApi.completeSquare(mainGameId ?: throw GameNotSetException(), SquareRequest(square, username)).execute()
         sendCard(event.channel, username)
     } catch (e: IOException) {
         sendError(event.channel, e)
