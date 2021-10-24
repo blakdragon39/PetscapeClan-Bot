@@ -49,20 +49,20 @@ interface PetscapeAPI {
     ): Call<BingoCard>
 
     @GET("api/bingo/{id}/players")
-    fun getPlayers(@Query("id") gameId: String): Call<List<String>>
+    fun getPlayers(@Path("id") gameId: String): Call<List<String>>
 
     @GET("api/bingo/{id}/winners")
-    fun getWinners(@Query("id") gameId: String): Call<List<BingoCard>>
+    fun getWinners(@Path("id") gameId: String): Call<List<BingoCard>>
 
     @GET("api/bingo/{id}/{username}")
     fun getCard(
-            @Query("id") gameId: String,
-            @Query("username") username: String
+            @Path("id") gameId: String,
+            @Path("username") username: String
     ): Call<BingoCard>
 
     @GET("api/bingo/{id}/{username}/image")
     fun getCardImage(
-        @Query("id") gameId: String,
-        @Query("username") username: String
+        @Path("id") gameId: String,
+        @Path("username") username: String
     ): Call<ResponseBody>
 }
