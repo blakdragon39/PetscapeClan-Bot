@@ -112,8 +112,6 @@ private fun sendBingoCommands(channel: MessageChannel) {
         - winners
         - getcard [username]
     """.trimIndent()).queue()
-
-    //todo updatenotes?
 }
 
 private fun sendBingoGamesList(event: MessageReceivedEvent) = runIfClanStaff(event) {
