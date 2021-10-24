@@ -164,7 +164,7 @@ private fun newCustomGame(event: MessageReceivedEvent, settings: BingoSettings) 
                 .thenAccept { file ->
                     try {
                         val contents = file.readText()
-                        val requestBody = contents.toRequestBody("text/json".toMediaTypeOrNull())
+                        val requestBody = contents.toRequestBody("application/json".toMediaTypeOrNull())
                         val response = petscapeApi.newCustomGame(requestBody).execute()
 
                         if (response.isSuccessful) {
