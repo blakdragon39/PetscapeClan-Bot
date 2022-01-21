@@ -10,6 +10,7 @@ enum class PetType {
     KalphitePrincess,
     LilZik,
     LittleNightmare,
+    Nexling,
     Noon,
     Olmlet,
     PetChaosElemental,
