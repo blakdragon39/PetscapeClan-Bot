@@ -21,6 +21,8 @@ fun handleHelpCommand(event: MessageReceivedEvent) {
         ps!clanmember [name]
         ps!pets [name]
         ps!achievements [name]
+        ps!bingo
+        ps!createpoll
     """.trimIndent())
 }
 

@@ -1,9 +1,6 @@
 package com.petscape.bot
 
-import com.petscape.bot.commands.handleAchievementsCommand
-import com.petscape.bot.commands.handleClanMemberCommand
-import com.petscape.bot.commands.handleHelpCommand
-import com.petscape.bot.commands.handlePetsCommand
+import com.petscape.bot.commands.*
 import com.petscape.bot.models.AchievementType
 import com.petscape.bot.models.PetType
 import com.squareup.moshi.FromJson
@@ -79,9 +76,8 @@ fun main(args: Array<String>) {
                     message.toLowerCase().startsWith("ps!clanmember") -> handleClanMemberCommand(event, parts.subList(1, parts.size))
                     message.toLowerCase().startsWith("ps!pets") -> handlePetsCommand(event, parts.subList(1, parts.size))
                     message.toLowerCase().startsWith("ps!achievements") -> handleAchievementsCommand(event, parts.subList(1, parts.size))
-//                    message.startsWith("!bingo") -> handleBingoCommand(event, parts.subList(1, parts.size))
-//                    message.startsWith("!kc") -> handleKillCountCommand(event, parts.subList(1, parts.size))
-//                    message.startsWith("!createpoll") -> handleCreatePollCommand(event)
+                    message.toLowerCase().startsWith("ps!bingo") -> handleBingoCommand(event, parts.subList(1, parts.size))
+                    message.toLowerCase().startsWith("ps!createpoll") -> handleCreatePollCommand(event)
                 }
             }
         }

@@ -1,6 +1,8 @@
 package com.petscape.bot
 
 import com.petscape.bot.models.*
+import com.petscape.bot.models.requests.SquareRequest
+import com.petscape.bot.models.requests.UsernameRequest
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -14,58 +16,53 @@ interface PetscapeAPI {
     @PUT("api/clanMembers/{id}/update")
     fun pingClanMember(@Path("id") clanMemberId: String): Call<ClanMember>
 
-    @GET("bingo/all")
+    @GET("/api/bingo")
     fun getAllGames(): Call<List<BingoGameId>>
 
-    @POST("bingo/new_game")
-    fun newBingoGame(
-            @Query("name") name: String,
-            @Query("type") type: GameType,
-            @Query("free_space") freeSpace: Boolean,
-            @Query("cards_match") cardsMatch: Boolean
-    ): Call<BingoGame>
+//    @POST("bingo/new_game")
+//    fun newBingoGame(
+//            @Query("name") name: String,
+//            @Query("type") type: GameType,
+//            @Query("free_space") freeSpace: Boolean,
+//            @Query("cards_match") cardsMatch: Boolean
+//    ): Call<BingoGame>
 
-    @POST("bingo/new_custom_game")
-    fun newCustomGame(
-            @Query("name") name: String,
-            @Body body: RequestBody
-    ): Call<BingoGame>
+    @POST("api/bingo/new_custom_game")
+    fun newCustomGame(@Body body: RequestBody): Call<BingoGame>
 
-    @POST("bingo/add_card")
+    @POST("api/bingo/{id}")
     fun addCard(
-            @Query("id") id: String,
-            @Query("username") username: String
+        @Path("id") gameId: String,
+        @Body request: UsernameRequest
     ): Call<BingoCard>
 
-    @POST("bingo/complete_square")
+    @POST("api/bingo/{id}/complete")
     fun completeSquare(
-            @Query("game_id") gameId: String,
-            @Query("card_id") cardId: String,
-            @Query("square_id") squareId: String
+        @Path("id") gameId: String,
+        @Body request: SquareRequest
     ): Call<BingoCard>
 
-    @POST("bingo/uncomplete_square")
+    @POST("api/bingo/{id}/uncomplete")
     fun uncompleteSquare(
-            @Query("game_id") gameId: String,
-            @Query("card_id") cardId: String,
-            @Query("square_id") squareId: String
+        @Path("id") gameId: String,
+        @Body request: SquareRequest
     ): Call<BingoCard>
 
-    @GET("bingo/players")
-    fun getPlayers(@Query("game_id") gameId: String): Call<List<String>>
+    @GET("api/bingo/{id}/players")
+    fun getPlayers(@Path("id") gameId: String): Call<List<String>>
 
-    @GET("bingo/winners")
-    fun getWinners(@Query("game_id") gameId: String): Call<List<BingoCard>>
+    @GET("api/bingo/{id}/winners")
+    fun getWinners(@Path("id") gameId: String): Call<List<BingoCard>>
 
-    @GET("bingo/get_card")
+    @GET("api/bingo/{id}/{username}")
     fun getCard(
-            @Query("game_id") gameId: String,
-            @Query("username") username: String
+            @Path("id") gameId: String,
+            @Path("username") username: String
     ): Call<BingoCard>
 
-    @GET("bingo/get_card_image")
+    @GET("api/bingo/{id}/{username}/image")
     fun getCardImage(
-            @Query("game_id") gameId: String,
-            @Query("username") username: String
+        @Path("id") gameId: String,
+        @Path("username") username: String
     ): Call<ResponseBody>
 }
